@@ -107,6 +107,34 @@ const Quiz = () => {
 
     return () => clearInterval(interval);
   }, [currentQuestion, questionEndTimes, lockedQuestions]);
+
+  useEffect(() => {
+    // Push a dummy history state so browser back stays within the quiz
+    window.history.pushState(null, "", window.location.href);
+
+    const handleBackButton = () => {
+      // Prevent navigating away immediately
+      window.history.pushState(null, "", window.location.href);
+
+      // Auto submit quiz
+      calculateScore();
+
+      // Redirect to Result page
+      navigate("/result", {
+        replace: true,
+        state: {
+          terminated: true,
+          reason: "Browser navigation detected",
+        },
+      });
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [calculateScore, navigate]);
   return (
     <div className="quiz-container">
       <div className="quiz-card">
