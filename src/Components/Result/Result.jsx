@@ -164,7 +164,7 @@ const Result = () => {
             Restart the quiz and try to beat your previous score.
           </p>
 
-          <Link to="/new">
+          <Link to="/">
 
             <button
               className="play-btn"
@@ -176,7 +176,6 @@ const Result = () => {
           </Link>
 
         </div>
-
       </div>
     </div>
   );

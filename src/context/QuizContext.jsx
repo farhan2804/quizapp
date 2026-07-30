@@ -38,9 +38,7 @@ export const QuizProvider = ({ children }) => {
   const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       const nextIndex = currentQuestion + 1;
-
       setCurrentQuestion(nextIndex);
-
       setSelectedOption(selectedAnswers[nextIndex] || null);
     }
   };
@@ -48,22 +46,18 @@ export const QuizProvider = ({ children }) => {
   const previousQuestion = () => {
     if (currentQuestion > 0) {
       const previousIndex = currentQuestion - 1;
-
       setCurrentQuestion(previousIndex);
-
       setSelectedOption(selectedAnswers[previousIndex] || null);
     }
   };
 
   const calculateScore = () => {
     let total = 0;
-
     questions.forEach((question, index) => {
       if (selectedAnswers[index] === question.ans) {
         total++;
       }
     });
-
     setScore(total);
   };
 
@@ -78,27 +72,18 @@ export const QuizProvider = ({ children }) => {
     <QuizContext.Provider
       value={{
         questions,
-
         currentQuestion,
         setCurrentQuestion,
-
         selectedOption,
         setSelectedOption,
-
         selectedAnswers,
-
         score,
-
         userName,
         setUserName,
-
         nextQuestion,
         previousQuestion,
-
         selectAnswer,
-
         calculateScore,
-
         resetQuiz,
       }}
     >
