@@ -1,4 +1,5 @@
 import "./Quiz.css";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../../context/QuizContext";
 
@@ -13,6 +14,9 @@ const Quiz = () => {
     nextQuestion,
     selectAnswer,
     calculateScore,
+    timeLeft,
+    setTimeLeft,
+    getTimerByDifficulty,
   } = useQuiz();
 
   if (questions.length === 0) {
@@ -25,9 +29,7 @@ const Quiz = () => {
 
   const question = questions[currentQuestion];
 
-  const progress = Math.round(
-    ((currentQuestion + 1) / questions.length) * 100
-  );
+  const progress = Math.round(((currentQuestion + 1) / questions.length) * 100);
 
   const options = [
     {
@@ -60,7 +62,36 @@ const Quiz = () => {
       nextQuestion();
     }
   };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
 
+          if (currentQuestion === questions.length - 1) {
+            calculateScore();
+            navigate("/result");
+          } else {
+            nextQuestion();
+          }
+
+          return getTimerByDifficulty();
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    currentQuestion,
+    questions.length,
+    calculateScore,
+    navigate,
+    nextQuestion,
+    setTimeLeft,
+    getTimerByDifficulty,
+  ]);
   return (
     <div className="quiz-container">
       <div className="quiz-card">
@@ -75,8 +106,12 @@ const Quiz = () => {
             <h1 className="question-title">{question.ques}</h1>
           </div>
 
-          <div className="progress-percentage">
-            {progress}%
+          <div className="quiz-info">
+            <div className={`timer ${timeLeft <= 10 ? "danger" : ""}`}>
+              ⏱ {timeLeft}s
+            </div>
+
+            <div className="progress-percentage">{progress}%</div>
           </div>
         </div>
 
@@ -102,17 +137,15 @@ const Quiz = () => {
               }`}
               onClick={() => selectAnswer(option.key)}
             >
-              <div className="option-letter">
-                {option.label}
-              </div>
+              <div className="option-letter">{option.label}</div>
 
-              <div className="option-text">
-                {option.value}
-              </div>
+              <div className="option-text">{option.value}</div>
             </button>
           ))}
         </div>
-
+        {selectedOption === null && (
+          <p className="select-message">Please select an answer to continue.</p>
+        )}
         {/* Footer */}
 
         <div className="quiz-footer">
@@ -127,6 +160,7 @@ const Quiz = () => {
           <button
             className="nav-btn next-btn"
             onClick={handleNext}
+            disabled={selectedOption === null}
           >
             {currentQuestion === questions.length - 1
               ? "Finish Quiz"

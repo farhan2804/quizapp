@@ -5,11 +5,16 @@ const QuizContext = createContext();
 
 export const QuizProvider = ({ children }) => {
   const [questions, setQuestions] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [category, setCategory] = useState("React");
+  const [difficulty, setDifficulty] = useState("Medium");
+  const [questionCount, setQuestionCount] = useState(10);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [lockedQuestions, setLockedQuestions] = useState([]);
   const [score, setScore] = useState(0);
-  const [userName, setUserName] = useState("");
+  const [timeLeft, setTimeLeft] = useState(30);
 
   useEffect(() => {
     fetchQuestions();
@@ -20,26 +25,32 @@ export const QuizProvider = ({ children }) => {
       const response = await axios.get(
         "https://656c91dae1e03bfd572e81e6.mockapi.io/QuizApp",
       );
-
       setQuestions(response.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const selectAnswer = (optionKey) => {
-    setSelectedOption(optionKey);
+ const selectAnswer = (optionKey) => {
+  // Prevent changing answer if question is locked
+  if (lockedQuestions[currentQuestion]) {
+    return;
+  }
+  setSelectedOption(optionKey);
+  const updatedAnswers = [...selectedAnswers];
+  updatedAnswers[currentQuestion] = optionKey;
 
-    const updatedAnswers = [...selectedAnswers];
-    updatedAnswers[currentQuestion] = optionKey;
-    setSelectedAnswers(updatedAnswers);
-  };
-
+  setSelectedAnswers(updatedAnswers);
+};
   const nextQuestion = () => {
+    const updatedLockedQuestions = [...lockedQuestions];
+    updatedLockedQuestions[currentQuestion] = true;
+    setLockedQuestions(updatedLockedQuestions);
     if (currentQuestion < questions.length - 1) {
       const nextIndex = currentQuestion + 1;
       setCurrentQuestion(nextIndex);
       setSelectedOption(selectedAnswers[nextIndex] || null);
+      setTimeLeft(getTimerByDifficulty());
     }
   };
 
@@ -48,6 +59,18 @@ export const QuizProvider = ({ children }) => {
       const previousIndex = currentQuestion - 1;
       setCurrentQuestion(previousIndex);
       setSelectedOption(selectedAnswers[previousIndex] || null);
+      setTimeLeft(getTimerByDifficulty());
+    }
+  };
+
+  const getTimerByDifficulty = () => {
+    switch (difficulty) {
+      case "Easy":
+        return 45;
+      case "Hard":
+        return 20;
+      default:
+        return 30;
     }
   };
 
@@ -66,6 +89,11 @@ export const QuizProvider = ({ children }) => {
     setSelectedOption(null);
     setSelectedAnswers([]);
     setScore(0);
+    setTimeLeft(getTimerByDifficulty());
+    setCategory("React");
+    setDifficulty("Medium");
+    setQuestionCount(10);
+    setLockedQuestions([]);
   };
 
   return (
@@ -80,11 +108,22 @@ export const QuizProvider = ({ children }) => {
         score,
         userName,
         setUserName,
+        category,
+        setCategory,
+        difficulty,
+        setDifficulty,
+        questionCount,
+        setQuestionCount,
         nextQuestion,
         previousQuestion,
         selectAnswer,
         calculateScore,
         resetQuiz,
+        timeLeft,
+        setTimeLeft,
+        getTimerByDifficulty,
+        lockedQuestions,
+        setLockedQuestions,
       }}
     >
       {children}

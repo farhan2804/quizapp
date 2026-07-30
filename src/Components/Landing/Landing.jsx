@@ -5,13 +5,27 @@ import { useQuiz } from "../../context/QuizContext";
 const Landing = () => {
   const navigate = useNavigate();
 
-  const { userName, setUserName } = useQuiz();
+  const {
+    userName,
+    setUserName,
+    category,
+    setCategory,
+    difficulty,
+    setDifficulty,
+    questionCount,
+    setQuestionCount,
+    setTimeLeft,
+    getTimerByDifficulty,
+  } = useQuiz();
 
   const startQuiz = () => {
     if (!userName.trim()) {
       alert("Please enter your name.");
       return;
     }
+
+    // Set timer based on difficulty
+    setTimeLeft(getTimerByDifficulty());
 
     navigate("/quiz");
   };
@@ -24,8 +38,11 @@ const Landing = () => {
         <h1>QuizGenius AI</h1>
 
         <p className="subtitle">
-          Master programming through intelligent quizzes and instant feedback.
+          Master programming through intelligent quizzes, AI generated questions
+          and instant feedback.
         </p>
+
+        {/* Name */}
 
         <div className="input-group">
           <label>Your Name</label>
@@ -38,8 +55,65 @@ const Landing = () => {
           />
         </div>
 
+        {/* Category */}
+
+        <div className="input-group">
+          <label>Category</label>
+
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option>React</option>
+
+            <option>Java</option>
+
+            <option>Spring Boot</option>
+
+            <option>JavaScript</option>
+
+            <option>SQL</option>
+          </select>
+        </div>
+
+        {/* Difficulty */}
+
+        <div className="input-group">
+          <label>Difficulty</label>
+
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+          >
+            <option>Easy</option>
+
+            <option>Medium</option>
+
+            <option>Hard</option>
+          </select>
+        </div>
+
+        {/* Question Count */}
+
+        <div className="input-group">
+          <label>Questions</label>
+
+          <select
+            value={questionCount}
+            onChange={(e) => setQuestionCount(Number(e.target.value))}
+          >
+            <option value={5}>5</option>
+
+            <option value={10}>10</option>
+
+            <option value={15}>15</option>
+
+            <option value={20}>20</option>
+          </select>
+        </div>
+
         <button className="start-btn" onClick={startQuiz}>
-          Start Quiz →
+          Start Learning →
         </button>
       </div>
     </div>
