@@ -14,7 +14,7 @@ export const QuizProvider = ({ children }) => {
   const [selectedAnswers, setSelectedAnswers] = useState([]);
   const [lockedQuestions, setLockedQuestions] = useState([]);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [questionEndTimes, setQuestionEndTimes] = useState([]);
 
   useEffect(() => {
     fetchQuestions();
@@ -25,32 +25,39 @@ export const QuizProvider = ({ children }) => {
       const response = await axios.get(
         "https://656c91dae1e03bfd572e81e6.mockapi.io/QuizApp",
       );
-      setQuestions(response.data);
+      const fetchedQuestions = response.data;
+      setQuestions(fetchedQuestions);
+      setQuestionEndTimes(fetchedQuestions.map(() => null));
     } catch (error) {
       console.log(error);
     }
   };
 
- const selectAnswer = (optionKey) => {
-  // Prevent changing answer if question is locked
-  if (lockedQuestions[currentQuestion]) {
-    return;
-  }
-  setSelectedOption(optionKey);
-  const updatedAnswers = [...selectedAnswers];
-  updatedAnswers[currentQuestion] = optionKey;
+  const selectAnswer = (optionKey) => {
+    // Prevent changing answer if question is locked
+    if (lockedQuestions[currentQuestion]) {
+      return;
+    }
+    setSelectedOption(optionKey);
+    const updatedAnswers = [...selectedAnswers];
+    updatedAnswers[currentQuestion] = optionKey;
+    setSelectedAnswers(updatedAnswers);
+  };
 
-  setSelectedAnswers(updatedAnswers);
-};
-  const nextQuestion = () => {
+  const lockCurrentQuestion = () => {
+    // Already locked? Don't update state again.
+    if (lockedQuestions[currentQuestion]) {
+      return;
+    }
     const updatedLockedQuestions = [...lockedQuestions];
     updatedLockedQuestions[currentQuestion] = true;
     setLockedQuestions(updatedLockedQuestions);
+  };
+  const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       const nextIndex = currentQuestion + 1;
       setCurrentQuestion(nextIndex);
       setSelectedOption(selectedAnswers[nextIndex] || null);
-      setTimeLeft(getTimerByDifficulty());
     }
   };
 
@@ -59,7 +66,8 @@ export const QuizProvider = ({ children }) => {
       const previousIndex = currentQuestion - 1;
       setCurrentQuestion(previousIndex);
       setSelectedOption(selectedAnswers[previousIndex] || null);
-      setTimeLeft(getTimerByDifficulty());
+      if (!lockedQuestions[previousIndex]) {
+      }
     }
   };
 
@@ -89,7 +97,7 @@ export const QuizProvider = ({ children }) => {
     setSelectedOption(null);
     setSelectedAnswers([]);
     setScore(0);
-    setTimeLeft(getTimerByDifficulty());
+    setQuestionEndTimes(questions.map(() => null));
     setCategory("React");
     setDifficulty("Medium");
     setQuestionCount(10);
@@ -119,11 +127,12 @@ export const QuizProvider = ({ children }) => {
         selectAnswer,
         calculateScore,
         resetQuiz,
-        timeLeft,
-        setTimeLeft,
+        questionEndTimes,
+        setQuestionEndTimes,
         getTimerByDifficulty,
         lockedQuestions,
         setLockedQuestions,
+        lockCurrentQuestion,
       }}
     >
       {children}

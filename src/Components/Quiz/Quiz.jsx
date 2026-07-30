@@ -1,5 +1,5 @@
 import "./Quiz.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../../context/QuizContext";
 
@@ -14,9 +14,11 @@ const Quiz = () => {
     nextQuestion,
     selectAnswer,
     calculateScore,
-    timeLeft,
-    setTimeLeft,
+    questionEndTimes,
+    setQuestionEndTimes,
     getTimerByDifficulty,
+    lockedQuestions,
+    lockCurrentQuestion,
   } = useQuiz();
 
   if (questions.length === 0) {
@@ -28,7 +30,8 @@ const Quiz = () => {
   }
 
   const question = questions[currentQuestion];
-
+  const endTime = questionEndTimes[currentQuestion];
+  const [timeLeft, setTimeLeft] = useState(getTimerByDifficulty());
   const progress = Math.round(((currentQuestion + 1) / questions.length) * 100);
 
   const options = [
@@ -55,6 +58,10 @@ const Quiz = () => {
   ];
 
   const handleNext = () => {
+    // Lock current question
+    if (!lockedQuestions[currentQuestion]) {
+      lockCurrentQuestion();
+    }
     if (currentQuestion === questions.length - 1) {
       calculateScore();
       navigate("/result");
@@ -63,35 +70,43 @@ const Quiz = () => {
     }
   };
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
+    if (lockedQuestions[currentQuestion]) return;
 
-          if (currentQuestion === questions.length - 1) {
-            calculateScore();
-            navigate("/result");
-          } else {
-            nextQuestion();
-          }
+    // First visit? Start timer now.
+    if (!questionEndTimes[currentQuestion]) {
+      const updated = [...questionEndTimes];
 
-          return getTimerByDifficulty();
+      updated[currentQuestion] = Date.now() + getTimerByDifficulty() * 1000;
+
+      setQuestionEndTimes(updated);
+
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const remaining = Math.max(
+        0,
+        Math.ceil((questionEndTimes[currentQuestion] - Date.now()) / 1000),
+      );
+
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(interval);
+
+        lockCurrentQuestion();
+
+        if (currentQuestion === questions.length - 1) {
+          calculateScore();
+          navigate("/result");
+        } else {
+          nextQuestion();
         }
-
-        return prev - 1;
-      });
+      }
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [
-    currentQuestion,
-    questions.length,
-    calculateScore,
-    navigate,
-    nextQuestion,
-    setTimeLeft,
-    getTimerByDifficulty,
-  ]);
+    return () => clearInterval(interval);
+  }, [currentQuestion, questionEndTimes, lockedQuestions]);
   return (
     <div className="quiz-container">
       <div className="quiz-card">
@@ -107,8 +122,16 @@ const Quiz = () => {
           </div>
 
           <div className="quiz-info">
-            <div className={`timer ${timeLeft <= 10 ? "danger" : ""}`}>
-              ⏱ {timeLeft}s
+            <div
+              className={`timer ${
+                !lockedQuestions[currentQuestion] && timeLeft <= 10
+                  ? "danger"
+                  : ""
+              }`}
+            >
+              {lockedQuestions[currentQuestion]
+                ? "🔒 Locked"
+                : `⏱ ${timeLeft}s`}
             </div>
 
             <div className="progress-percentage">{progress}%</div>
@@ -135,7 +158,12 @@ const Quiz = () => {
               className={`option-card ${
                 selectedOption === option.key ? "selected" : ""
               }`}
-              onClick={() => selectAnswer(option.key)}
+              disabled={lockedQuestions[currentQuestion]}
+              onClick={() => {
+                if (!lockedQuestions[currentQuestion]) {
+                  selectAnswer(option.key);
+                }
+              }}
             >
               <div className="option-letter">{option.label}</div>
 
@@ -143,8 +171,13 @@ const Quiz = () => {
             </button>
           ))}
         </div>
-        {selectedOption === null && (
+        {!lockedQuestions[currentQuestion] && selectedOption === null && (
           <p className="select-message">Please select an answer to continue.</p>
+        )}
+        {lockedQuestions[currentQuestion] && (
+          <p className="select-message">
+            🔒 Answer submitted. This question is locked.
+          </p>
         )}
         {/* Footer */}
 
@@ -160,7 +193,9 @@ const Quiz = () => {
           <button
             className="nav-btn next-btn"
             onClick={handleNext}
-            disabled={selectedOption === null}
+            disabled={
+              selectedOption === null && !lockedQuestions[currentQuestion]
+            }
           >
             {currentQuestion === questions.length - 1
               ? "Finish Quiz"

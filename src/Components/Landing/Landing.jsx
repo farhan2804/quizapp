@@ -4,7 +4,6 @@ import { useQuiz } from "../../context/QuizContext";
 
 const Landing = () => {
   const navigate = useNavigate();
-
   const {
     userName,
     setUserName,
@@ -14,8 +13,6 @@ const Landing = () => {
     setDifficulty,
     questionCount,
     setQuestionCount,
-    setTimeLeft,
-    getTimerByDifficulty,
   } = useQuiz();
 
   const startQuiz = () => {
@@ -23,10 +20,6 @@ const Landing = () => {
       alert("Please enter your name.");
       return;
     }
-
-    // Set timer based on difficulty
-    setTimeLeft(getTimerByDifficulty());
-
     navigate("/quiz");
   };
 
