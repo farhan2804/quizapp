@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #09122c;
+  padding: 20px;
+}
+
+.landing-card {
+  width: 500px;
+  background: white;
+  border-radius: 25px;
+  padding: 50px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.badge {
+  display: inline-block;
+  background: #e9f8ff;
+  color: #0077b6;
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.landing-card h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #09122c;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 25px;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #09122c;
+}
+
+.input-group input {
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #00adb5;
+}
+
+.start-btn {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 12px;
+  background: #00adb5;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.start-btn:hover {
+  background: #008891;
+  transform: translateY(-2px);
+}
