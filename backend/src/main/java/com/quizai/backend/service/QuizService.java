@@ -2,46 +2,35 @@ package com.quizai.backend.service;
 
 import com.quizai.backend.dto.QuizQuestion;
 import com.quizai.backend.dto.QuizRequest;
+import com.quizai.backend.questionbank.ReactQuestions;
 import org.springframework.stereotype.Service;
-
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class QuizService {
 
-   public List<QuizQuestion> generateQuestions(QuizRequest request) {
+        public List<QuizQuestion> generateQuestions(QuizRequest request) {
 
-    List<QuizQuestion> questions = new ArrayList<>();
+                List<QuizQuestion> questions;
 
-    questions.add(new QuizQuestion(
-            "Which hook is used for state management in React?",
-            "useEffect",
-            "useState",
-            "useMemo",
-            "useRef",
-            "optionB"
-    ));
+                switch (request.getCategory()) {
 
-    questions.add(new QuizQuestion(
-            "Which company developed Java?",
-            "Microsoft",
-            "Google",
-            "Sun Microsystems",
-            "Apple",
-            "optionC"
-    ));
+                        case "React":
+                                questions = new ArrayList<>(ReactQuestions.getQuestions());
+                                break;
 
-    questions.add(new QuizQuestion(
-            "Which keyword is used to inherit a class in Java?",
-            "implements",
-            "inherits",
-            "extends",
-            "super",
-            "optionC"
-    ));
+                        default:
+                                questions = new ArrayList<>(ReactQuestions.getQuestions());
+                }
 
-    return questions;
-}
+                // Shuffle questions randomly
+                Collections.shuffle(questions);
 
+                // Return only the requested number of questions
+                int count = Math.min(request.getQuestionCount(), questions.size());
+
+                return questions.subList(0, count);
+        }
 }
