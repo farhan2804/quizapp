@@ -13,13 +13,15 @@ const Landing = () => {
     setDifficulty,
     questionCount,
     setQuestionCount,
+    fetchQuestions,
   } = useQuiz();
 
-  const startQuiz = () => {
+  const startQuiz = async () => {
     if (!userName.trim()) {
       alert("Please enter your name.");
       return;
     }
+    await fetchQuestions();
     navigate("/quiz");
   };
 

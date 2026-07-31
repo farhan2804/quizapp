@@ -22,8 +22,13 @@ export const QuizProvider = ({ children }) => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get(
-        "https://656c91dae1e03bfd572e81e6.mockapi.io/QuizApp",
+      const response = await axios.post(
+        "http://localhost:8080/api/quiz/generate",
+        {
+          category,
+          difficulty,
+          questionCount,
+        },
       );
       const fetchedQuestions = response.data;
       setQuestions(fetchedQuestions);
@@ -32,7 +37,6 @@ export const QuizProvider = ({ children }) => {
       console.log(error);
     }
   };
-
   const selectAnswer = (optionKey) => {
     // Prevent changing answer if question is locked
     if (lockedQuestions[currentQuestion]) {
@@ -133,6 +137,7 @@ export const QuizProvider = ({ children }) => {
         lockedQuestions,
         setLockedQuestions,
         lockCurrentQuestion,
+        fetchQuestions,
       }}
     >
       {children}
