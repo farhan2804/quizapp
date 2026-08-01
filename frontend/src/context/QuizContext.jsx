@@ -60,7 +60,8 @@ export const QuizProvider = ({ children }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/quiz/generate",
+        // "http://localhost:8080/api/quiz/generate",
+        "https://quizapp-1sc5.onrender.com/api/quiz/generate",
         {
           category,
           difficulty,
