@@ -15,12 +15,49 @@ export const QuizProvider = ({ children }) => {
   const [lockedQuestions, setLockedQuestions] = useState([]);
   const [score, setScore] = useState(0);
   const [questionEndTimes, setQuestionEndTimes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
+  // useEffect(() => {
+  //   fetchQuestions();
+  // }, []);
+  const shuffleQuestion = (question) => {
+    const options = [
+      { key: "optionA", value: question.optionA },
+      { key: "optionB", value: question.optionB },
+      { key: "optionC", value: question.optionC },
+      { key: "optionD", value: question.optionD },
+    ];
 
+    // Fisher-Yates Shuffle
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+
+    const shuffledQuestion = {
+      ...question,
+      optionA: options[0].value,
+      optionB: options[1].value,
+      optionC: options[2].value,
+      optionD: options[3].value,
+    };
+
+    // Find where the original correct answer moved
+    const correctOptionText = question[question.ans];
+
+    const correctIndex = options.findIndex(
+      (option) => option.value === correctOptionText,
+    );
+
+    shuffledQuestion.ans = ["optionA", "optionB", "optionC", "optionD"][
+      correctIndex
+    ];
+
+    return shuffledQuestion;
+  };
   const fetchQuestions = async () => {
+    setIsLoading(true);
+
     try {
       const response = await axios.post(
         "http://localhost:8080/api/quiz/generate",
@@ -31,10 +68,13 @@ export const QuizProvider = ({ children }) => {
         },
       );
       const fetchedQuestions = response.data;
-      setQuestions(fetchedQuestions);
-      setQuestionEndTimes(fetchedQuestions.map(() => null));
+      const shuffledQuestions = fetchedQuestions.map(shuffleQuestion);
+      setQuestions(shuffledQuestions);
+      setQuestionEndTimes(shuffledQuestions.map(() => null));
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   const selectAnswer = (optionKey) => {
@@ -138,6 +178,7 @@ export const QuizProvider = ({ children }) => {
         setLockedQuestions,
         lockCurrentQuestion,
         fetchQuestions,
+        isLoading,
       }}
     >
       {children}

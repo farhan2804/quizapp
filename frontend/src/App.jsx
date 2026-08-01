@@ -4,14 +4,13 @@ import Landing from "./Components/Landing/Landing";
 import Quiz from "./Components/Quiz/Quiz";
 import Result from "./Components/Result/Result";
 import Review from "./Components/Review/Review";
-import { QuestionsProvider } from "./context/questionsContext";
 import { QuizProvider } from "./context/QuizContext";
 
 import "./App.css";
 
 const App = () => {
   return (
-    <QuestionsProvider>
+   
       <QuizProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -20,7 +19,7 @@ const App = () => {
           <Route path="/review" element={<Review />} />
         </Routes>
       </QuizProvider>
-    </QuestionsProvider>
+   
   );
 };
 
