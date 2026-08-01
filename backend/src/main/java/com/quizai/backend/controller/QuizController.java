@@ -2,8 +2,8 @@ package com.quizai.backend.controller;
 
 import com.quizai.backend.dto.QuizQuestion;
 import com.quizai.backend.dto.QuizRequest;
+import com.quizai.backend.service.GroqService;
 import com.quizai.backend.service.QuizService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,8 +13,13 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class QuizController {
 
-    @Autowired
-    private QuizService quizService;
+    private final QuizService quizService;
+    private final GroqService groqService;
+
+    public QuizController(QuizService quizService, GroqService groqService) {
+        this.quizService = quizService;
+        this.groqService = groqService;
+    }
 
     @GetMapping("/test")
     public String test() {
@@ -22,9 +27,7 @@ public class QuizController {
     }
 
     @PostMapping("/generate")
-    public List<QuizQuestion> generateQuiz(
-            @RequestBody QuizRequest request) {
-
+    public List<QuizQuestion> generateQuiz(@RequestBody QuizRequest request) {
         return quizService.generateQuestions(request);
     }
 }

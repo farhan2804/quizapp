@@ -12,7 +12,7 @@ public class ReactQuestions {
         List<QuizQuestion> questions = new ArrayList<>();
 
         questions.add(new QuizQuestion(
-                "Which hook is used for state management in React?",
+                "THIS IS STATIC QUESTION TEST",
                 "useEffect",
                 "useState",
                 "useMemo",
