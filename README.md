@@ -118,19 +118,19 @@ AI Generated Questions
 
 ## Landing Page
 
-![Landing](./assets/landing-page.png)
+![Landing](./assets/landing_page.png)
 
 ---
 
 ## Quiz Assessment
 
-![Quiz](./assets/quiz-screen.png)
+![Quiz](./assets/quiz_assesment.png)
 
 ---
 
 ## Results
 
-![Results](./assets/result-page.png)
+![Results](./assets/result.png)
 
 ---
 
@@ -139,13 +139,13 @@ AI Generated Questions
 ### Frontend
 
 ```
-https://YOUR_GITHUB_PAGES_LINK
+https://farhan2804.github.io/quizapp/
 ```
 
 ### Backend
 
 ```
-https://YOUR_RENDER_BACKEND
+Deployed In Render
 ```
 
 ---
