@@ -2,7 +2,7 @@
 
 > AI Powered Quiz Generation Platform built with **React, Spring Boot and Groq AI**.
 
-![QuizGenius AI](./assets/quizgenius-banner.png)
+![QuizGenius AI](./assets/landing_page.png)
 
 ## 📌 Overview
 
