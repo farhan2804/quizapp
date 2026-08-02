@@ -30,38 +30,36 @@ const Quiz = () => {
   }
 
   const question = questions[currentQuestion];
-  const endTime = questionEndTimes[currentQuestion];
   const [timeLeft, setTimeLeft] = useState(getTimerByDifficulty());
-  const progress = Math.round(((currentQuestion + 1) / questions.length) * 100);
+
+  const progress = Math.round(
+    ((currentQuestion + 1) / questions.length) * 100
+  );
 
   const options = [
-    {
-      key: "optionA",
-      label: "A",
-      value: question.optionA,
-    },
-    {
-      key: "optionB",
-      label: "B",
-      value: question.optionB,
-    },
-    {
-      key: "optionC",
-      label: "C",
-      value: question.optionC,
-    },
-    {
-      key: "optionD",
-      label: "D",
-      value: question.optionD,
-    },
+    { key: "optionA", label: "A", value: question.optionA },
+    { key: "optionB", label: "B", value: question.optionB },
+    { key: "optionC", label: "C", value: question.optionC },
+    { key: "optionD", label: "D", value: question.optionD },
   ];
 
+  const terminateQuiz = () => {
+    calculateScore();
+
+    navigate("/result", {
+      replace: true,
+      state: {
+        terminated: true,
+        reason: "Browser navigation detected",
+      },
+    });
+  };
+
   const handleNext = () => {
-    // Lock current question
     if (!lockedQuestions[currentQuestion]) {
       lockCurrentQuestion();
     }
+
     if (currentQuestion === questions.length - 1) {
       calculateScore();
       navigate("/result");
@@ -69,14 +67,17 @@ const Quiz = () => {
       nextQuestion();
     }
   };
+
+  // ================= Timer =================
+
   useEffect(() => {
     if (lockedQuestions[currentQuestion]) return;
 
-    // First visit? Start timer now.
     if (!questionEndTimes[currentQuestion]) {
       const updated = [...questionEndTimes];
 
-      updated[currentQuestion] = Date.now() + getTimerByDifficulty() * 1000;
+      updated[currentQuestion] =
+        Date.now() + getTimerByDifficulty() * 1000;
 
       setQuestionEndTimes(updated);
 
@@ -86,7 +87,9 @@ const Quiz = () => {
     const interval = setInterval(() => {
       const remaining = Math.max(
         0,
-        Math.ceil((questionEndTimes[currentQuestion] - Date.now()) / 1000),
+        Math.ceil(
+          (questionEndTimes[currentQuestion] - Date.now()) / 1000
+        )
       );
 
       setTimeLeft(remaining);
@@ -106,27 +109,23 @@ const Quiz = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [currentQuestion, questionEndTimes, lockedQuestions]);
+  }, [
+    currentQuestion,
+    questionEndTimes,
+    lockedQuestions,
+    calculateScore,
+    navigate,
+  ]);
+
+  // ================= Browser Back =================
 
   useEffect(() => {
-    // Push a dummy history state so browser back stays within the quiz
     window.history.pushState(null, "", window.location.href);
 
     const handleBackButton = () => {
-      // Prevent navigating away immediately
       window.history.pushState(null, "", window.location.href);
 
-      // Auto submit quiz
-      calculateScore();
-
-      // Redirect to Result page
-      navigate("/result", {
-        replace: true,
-        state: {
-          terminated: true,
-          reason: "Browser navigation detected",
-        },
-      });
+      terminateQuiz();
     };
 
     window.addEventListener("popstate", handleBackButton);
@@ -134,12 +133,33 @@ const Quiz = () => {
     return () => {
       window.removeEventListener("popstate", handleBackButton);
     };
-  }, [calculateScore, navigate]);
+  }, []);
+
+  // ================= Tab Switching =================
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        terminateQuiz();
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+    };
+  }, []);
+
   return (
     <div className="quiz-container">
       <div className="quiz-card">
-        {/* Header */}
-
         <div className="quiz-header">
           <div>
             <p className="question-count">
@@ -166,18 +186,12 @@ const Quiz = () => {
           </div>
         </div>
 
-        {/* Progress Bar */}
-
         <div className="progress">
           <div
             className="progress-fill"
-            style={{
-              width: `${progress}%`,
-            }}
+            style={{ width: `${progress}%` }}
           ></div>
         </div>
-
-        {/* Options */}
 
         <div className="option-list">
           {options.map((option) => (
@@ -199,15 +213,19 @@ const Quiz = () => {
             </button>
           ))}
         </div>
-        {!lockedQuestions[currentQuestion] && selectedOption === null && (
-          <p className="select-message">Please select an answer to continue.</p>
-        )}
+
+        {!lockedQuestions[currentQuestion] &&
+          selectedOption === null && (
+            <p className="select-message">
+              Please select an answer to continue.
+            </p>
+          )}
+
         {lockedQuestions[currentQuestion] && (
           <p className="select-message">
             🔒 Answer submitted. This question is locked.
           </p>
         )}
-        {/* Footer */}
 
         <div className="quiz-footer">
           <button
@@ -222,7 +240,8 @@ const Quiz = () => {
             className="nav-btn next-btn"
             onClick={handleNext}
             disabled={
-              selectedOption === null && !lockedQuestions[currentQuestion]
+              selectedOption === null &&
+              !lockedQuestions[currentQuestion]
             }
           >
             {currentQuestion === questions.length - 1
