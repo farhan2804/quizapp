@@ -152,7 +152,7 @@ const Landing = () => {
           <>
             <div className="loader"></div>
 
-            <h2>🤖 AI is generating your quiz...</h2>
+            <h2> ⚙️ Groq AI is building your assessment...</h2>
 
             <p className="subtitle">
               Preparing {questionCount} {difficulty} {category} questions.
